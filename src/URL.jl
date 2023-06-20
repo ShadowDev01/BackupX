@@ -36,7 +36,7 @@ end
 
 function URL(url::AbstractString)
     url::String = replace(url, "www." => "")
-    parts = match(r"^(\w+):\/\/(([\w\-]+):(.+)\@)?([\w\-\.]+):?(\d+)?([\/,\w\.]+)?(\?[^\#]*)?(\#.*)?", url).captures
+    parts = match(r"^(\w+):\/\/(([\w\-]+):(.+)\@)?([\w\-\.]+):?(\d+)?([\/,\w\-\.]+)?(\?[^\#]*)?(\#.*)?", url).captures
     replace!(parts, nothing => "")
     deleteat!(parts, 2)
     scheme::String = parts[1]
