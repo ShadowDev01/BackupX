@@ -4,9 +4,9 @@ import JSON
 
 function generate(;urls, text_patterns, date_ptterns, words, nums, years, months, days, exts, output)
     res = Set{AbstractString}()
-    for url in urls
+    Threads.@threads for url in urls
         u = URL(url)
-        Threads.@threads for pattern in text_patterns
+        for pattern in text_patterns
             pattern = replace(pattern, "\$" => "")
             for num in nums
                 for word in words
@@ -29,7 +29,7 @@ function generate(;urls, text_patterns, date_ptterns, words, nums, years, months
                 end
             end
         end
-        Threads.@threads for pattern in date_ptterns
+        for pattern in date_ptterns
             pattern = replace(pattern, "\$" => "", "%" => "")
             for year in years
                 for month in months
