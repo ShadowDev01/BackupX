@@ -4,27 +4,29 @@ import JSON
 
 function generate(;urls, text_patterns, date_ptterns, words, nums, years, months, days, exts, output)
     res = Set{AbstractString}()
-    Threads.@threads for url in urls
+    for url in urls
         u = URL(url)
         for pattern in text_patterns
             pattern = replace(pattern, "\$" => "")
-            for num in nums
-                for word in words
-                    for ext in exts
-                        out = replace(
-                            pattern,
-                            "full_domain" => u.host,
-                            "domain_name" => u.domain,
-                            "subdomain" => u.subdomain,
-                            "full_path" => u.path,
-                            "path" => u.directory,
-                            "file_name" => u.file,
-                            "tld" => u.tld,
-                            "num" => num,
-                            "word" => word,
-                            "ext" => ext
-                        )
-                        push!(res, out)
+            for subs in _subs(u.subdomain)
+                for num in nums
+                    for word in words
+                        for ext in exts
+                            out = replace(
+                                pattern,
+                                "full_domain" => u.host,
+                                "domain_name" => u.domain,
+                                "subdomain" => subs,
+                                "full_path" => u.path,
+                                "path" => u.directory,
+                                "file_name" => u.file,
+                                "tld" => u.tld,
+                                "num" => num,
+                                "word" => word,
+                                "ext" => ext
+                            )
+                            push!(res, out)
+                        end
                     end
                 end
             end

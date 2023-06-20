@@ -16,8 +16,8 @@ end
 
 function extract(host)
     tlds = Set()
-    for line in eachline("tlds.txt")
-        occursin(Regex("\\b$line\\b"), host) && push!(tlds, line)
+    for line in eachline("./src/tlds.txt")
+        occursin(Regex("\\b$line\\b\\Z"), host) && push!(tlds, line)
     end
     tld = collect(tlds)[findmax(length, collect(tlds))[2]]
     rest = rsplit(replace(host, tld => ""), ".", limit=2)
@@ -28,6 +28,10 @@ function extract(host)
         domain = rest[1]
     end
     return (subdomain, domain, strip(tld, '.'))
+end
+
+function _subs(subdomain)
+    unique(vcat([subdomain], split(subdomain, r"[\.\-]"), split(subdomain, ".")))
 end
 
 function URL(url::AbstractString)
