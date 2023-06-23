@@ -12,6 +12,7 @@ struct URL
     file::String
     query::String
     fragment::String
+    all::Vector{AbstractString}
 end
 
 function extract(host)
@@ -46,9 +47,10 @@ function URL(url::AbstractString)
     subdomain::String, domain::String, tld::String = extract(host)
     port::String = parts[5]
     path::String = parts[6]
-    dirctory::String = dirname(path)
+    directory::String = dirname(path)
     file::String = basename(path)
     query::String = parts[7]
     fragment::String  = parts[8]
-    return URL(scheme, username, password, host, subdomain, domain, tld, port, path, dirctory, file, query, fragment)
+    all::Vector{AbstractString} = [scheme, username, password, host, subdomain, domain, tld, port, path, directory, file, query, fragment]
+    return URL(scheme, username, password, host, subdomain, domain, tld, port, path, directory, file, query, fragment, all)
 end

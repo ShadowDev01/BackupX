@@ -1,76 +1,49 @@
 include("src/args.jl")
 include("src/URL.jl")
-import JSON
+using JSON
+using Printf
 
-function generate(;urls, text_patterns, date_ptterns, words, nums, years, months, days, exts, output)
-    res = Set{AbstractString}()
+function generate(;urls, patterns, words, nums, years, months, days, exts, output)
+    res = String[]
+
     for url in urls
         u = URL(url)
-        for pattern in text_patterns
-            pattern = replace(pattern, "\$" => "")
-            for subs in _subs(u.subdomain)
-                for num in nums
-                    for word in words
-                        for ext in exts
-                            out = replace(
-                                pattern,
-                                "full_domain" => u.host,
-                                "domain_name" => u.domain,
-                                "subdomain" => subs,
-                                "full_path" => u.path,
-                                "path" => u.directory,
-                                "file_name" => u.file,
-                                "tld" => u.tld,
-                                "num" => num,
-                                "word" => word,
-                                "ext" => ext
-                            )
-                            push!(res, out)
-                        end
-                    end
-                end
-            end
-        end
-        for pattern in date_ptterns
-            pattern = replace(pattern, "\$" => "", "%" => "")
-            for year in years
-                for month in months
-                    for day in days
-                        for ext in exts
-                            out = replace(
-                                pattern,
-                                "full_domain" => u.host,
-                                "domain_name" => u.domain,
-                                "subdomain" => u.subdomain,
-                                "full_path" => u.path,
-                                "path" => u.directory,
-                                "file_name" => u.file,
-                                "tld" => u.tld,
-                                "y" => year,
-                                "m" => month,
-                                "d" => day,
-                                "ext" => ext
-                            )
-                            push!(res, out)
-                        end
-                    end
-                end
+        global scheme, username, password, host, subdomain, domain, tld, port, path, directory, file, query, fragment = map(x -> [x], u.all)
+        global word = words
+        global num = nums
+        global y = years
+        global m = months
+        global d  = days
+        global ext = exts
+
+        for pattern in patterns
+            printf = replace(pattern, "\$" => "%s" ,"%" => "%d", isletter => "") |> Printf.Format
+            edit = split(pattern, !isletter, keepempty=false)
+            mix = map(eval ∘ Meta.parse, edit)
+            for items in Iterators.product(mix...)
+               push!(res, Printf.format(printf, items...))
             end
         end
     end
+
     if !isnothing(output)
         open(output, "w+") do f
             write(f, join(res, "\n"))
         end
     else
-        println(join(res, "\n"))
+        print(join(res, "\n"))
     end
 end
 
 function main()
     arguments = ARGUMENTS()
-    AllPatterns::Dict = open(arguments["pattern"]) do f
-        JSON.parse(read(f, String))
+    patterns = open(arguments["pattern"], "r") do f
+        D = read(f, String) |> JSON.parse
+        A = String[]
+        for key in keys(D)
+            append!(A, D[key])
+        end
+        A
     end
     words = !isnothing(arguments["wordlist"]) ? readlines(arguments["wordlist"]) : [""]
     ext = !isnothing(arguments["extension"]) ? readlines(arguments["extension"]) : [""]
@@ -100,11 +73,11 @@ function main()
     end
     output = arguments["output"]
     if arguments["stdin"]
-        generate(urls=readlines(stdin), text_patterns=AllPatterns["patterns"], date_ptterns=AllPatterns["date-formats"], words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+        generate(urls=readlines(stdin), patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
     elseif !isnothing(arguments["url"])
-        generate(urls=[arguments["url"]], text_patterns=AllPatterns["patterns"], date_ptterns=AllPatterns["date-formats"], words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+        generate(urls=[arguments["url"]], patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
     elseif !isnothing(arguments["urls"])
-        generate(urls=arguments["urls"], text_patterns=AllPatterns["patterns"], date_ptterns=AllPatterns["date-formats"], words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+        generate(urls=arguments["urls"], patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
     end
 end
 
