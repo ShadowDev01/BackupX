@@ -17,7 +17,7 @@ function generate(;urls, patterns, words, nums, years, months, days, exts, outpu
         global d  = days
         global ext = exts
 
-        pattern in patterns
+        for pattern in patterns
             printf = replace(pattern, "\$" => "%s" ,"%" => "%s", isletter => "") |> Printf.Format
             edit = split(pattern, !isletter, keepempty=false)
             mix = map(eval ∘ Meta.parse, edit)
