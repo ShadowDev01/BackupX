@@ -17,7 +17,7 @@ function generate(;urls, patterns, words, nums, years, months, days, exts, outpu
         global d  = days
         global ext = exts
 
-        for pattern in patterns
+        pattern in patterns
             printf = replace(pattern, "\$" => "%s" ,"%" => "%s", isletter => "") |> Printf.Format
             edit = split(pattern, !isletter, keepempty=false)
             mix = map(eval ∘ Meta.parse, edit)
@@ -66,7 +66,7 @@ function main()
     elseif !isnothing(arguments["url"])
         generate(urls=[arguments["url"]], patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
     elseif !isnothing(arguments["urls"])
-        generate(urls=arguments["urls"], patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+        generate(urls=readlines(arguments["urls"]), patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
     end
 end
 
