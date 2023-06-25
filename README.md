@@ -35,6 +35,7 @@
 # Switches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # optional arguments:
+
 *  -h, --help            show this help message and exit
 *  -u, --url             single url
 *  -U, --urls            multiple urls in file
@@ -58,7 +59,7 @@
 > julia BackupX.jl -U [file] -p [file] -w [file] -e [file] -n [min-max] -y [min-max] -m [min-max] -d [min-max]
 ~~~
 
-# Variabes
+# Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # for example consider this url: https://root:1234@api-v1.admin.mysite.co.uk:443/dir1/dir2/myfile.php?id=5678&user=nobody#nothing
 # you can use below variables in your custom patterns:
@@ -81,6 +82,9 @@
 * y:         years (i.e. 2022-2023)
 * m:         months (i.e. 1-12)
 * d:         days (i.e. 1-30)
+
+
+# you can use $ or % to define your variables in pattern: $num or %num     $ext or %ext
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Example of using Variables in Patterns.json

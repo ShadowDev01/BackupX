@@ -43,7 +43,7 @@ end
 
 function main()
     arguments = ARGUMENTS()
-
+    
     patterns = open(arguments["pattern"], "r") do f
         try
             D = read(f, String) |> JSON.parse
