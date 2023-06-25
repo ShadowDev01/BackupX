@@ -3,7 +3,7 @@ include("src/URL.jl")
 using JSON
 using Printf
 
-function generate(;urls, patterns, words, nums, years, months, days, exts, output)
+function generate(; urls, patterns, words, nums, years, months, days, exts, output)
     res = String[]
 
     for url in urls
@@ -14,15 +14,15 @@ function generate(;urls, patterns, words, nums, years, months, days, exts, outpu
         global num = nums
         global y = years
         global m = months
-        global d  = days
+        global d = days
         global ext = exts
 
         for pattern in patterns
-            printf = replace(pattern, "\$" => "%s" ,"%" => "%s", isletter => "") |> Printf.Format
+            printf = replace(pattern, "\$" => "%s", "%" => "%s", isletter => "") |> Printf.Format
             edit = split(pattern, !isletter, keepempty=false)
             mix = map(eval ∘ Meta.parse, edit)
             for items in Iterators.product(mix...)
-               push!(res, Printf.format(printf, items...))
+                push!(res, Printf.format(printf, items...))
             end
         end
     end
@@ -36,29 +36,34 @@ function generate(;urls, patterns, words, nums, years, months, days, exts, outpu
     end
 end
 
-function numbers(s::String)
+function numbers(s::String, p::Int=1)
     x = map(n -> parse(Int64, strip(n)), split(s, "-"))
-    map(i -> string(i), collect(x[1]:x[2]))
+    map(i -> string(i, pad=p), collect(x[1]:x[2]))
 end
 
 function main()
     arguments = ARGUMENTS()
 
     patterns = open(arguments["pattern"], "r") do f
-        D = read(f, String) |> JSON.parse
-        A = String[]
-        for key in keys(D)
-            append!(A, D[key])
+        try
+            D = read(f, String) |> JSON.parse
+            A = String[]
+            for key in keys(D)
+                append!(A, D[key])
+            end
+            A
+        catch e
+            @warn sprint(showerror, e) file=arguments["pattern"]
+            exit(0)
         end
-        A
     end
 
     words = !isnothing(arguments["wordlist"]) ? readlines(arguments["wordlist"]) : [""]
     ext = !isnothing(arguments["extension"]) ? readlines(arguments["extension"]) : [""]
     number = !isnothing(arguments["number"]) ? numbers(arguments["number"]) : [""]
     years = !isnothing(arguments["year"]) ? numbers(arguments["year"]) : [""]
-    months = !isnothing(arguments["month"]) ? numbers(arguments["month"]) : [""]
-    days = !isnothing(arguments["day"]) ? numbers(arguments["day"]) : [""]
+    months = !isnothing(arguments["month"]) ? numbers(arguments["month"], 2) : [""]
+    days = !isnothing(arguments["day"]) ? numbers(arguments["day"], 2) : [""]
     output = arguments["output"]
 
     if arguments["stdin"]

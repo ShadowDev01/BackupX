@@ -17,13 +17,13 @@
         "$word.$ext",
         "$directory/$word.$ext",
         "$directory/$word"
-     ],
-     "date-formats":[
-         "$domain.%y.$ext",
-         "$domain.%y-%m-%d.$ext",
-         "$host.%y-%m-%d.$ext",
-         "$host.%y%m%d.$ext",
-         "$host.%y%m%d.$ext",
-         "$directory/%y-%m-%d.$ext"
-     ]
- }
+    ],
+    "date-formats":[
+        "$domain.%y.$ext",
+        "$domain.%y-%m-%d.$ext",
+        "$host.%y-%m-%d.$ext",
+        "$host.%y%m%d.$ext",
+        "$host.%y%m%d.$ext",
+        "$directory/%y-%m-%d.$ext"
+    ]
+}
