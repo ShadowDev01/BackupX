@@ -20,7 +20,7 @@ function extract(host)
     for line in eachline("./src/tlds.txt")
         occursin(Regex("\\b$line\\b\\Z"), host) && push!(tlds, line)
     end
-    tld = collect(tlds)[findmax(length, collect(tlds))[2]]
+    tld = argmax(length, tlds)
     rest = rsplit(replace(host, tld => ""), ".", limit=2)
     if length(rest) > 1
         subdomain, domain = rest
