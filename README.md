@@ -78,6 +78,8 @@
 * query:     ?id=5678&user=nobody
 * fragment:  #nothing
 
+* word:      your custom words
+* ext:       your custom extensions
 * num:       numbers (i.e. 1-100)
 * y:         years (i.e. 2022-2023)
 * m:         months (i.e. 1-12)
