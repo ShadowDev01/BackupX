@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                             *** julia ***
 
-# install julia: https://julialang.org/downloads/
+# install julia: https://julialang.org/downloads/    or    snap install julia --classic
 # then run this commands in terminal:
 
 * 1. julia -e 'using Pkg; Pkg.add("JSON"); Pkg.add("ArgParse")'
