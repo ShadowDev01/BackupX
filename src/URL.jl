@@ -91,21 +91,19 @@ end
 
 function URL(url::AbstractString)
     url::String = replace(url, "www." => "")
-    parts = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?(\?[^\#]*)?(\#.*)?", url).captures
-    replace!(parts, nothing => "")
-    deleteat!(parts, 2)
-    scheme::String = parts[1]
-    user_pass_check::Bool = occursin(r"\/\/([\w\-]+)\@", split(url, parts[4])[1])
-    username::String = user_pass_check ? join(parts[2:3]) : parts[2]
-    password::String = user_pass_check ? "" : parts[3]
-    host::String = parts[4]
+    parts = match(r"^(?<scheme>\w+):\/\/((?<username>[\w\-]+)\:?(?<password>.*)\@)?(?<host>[\w\-\.]+):?(?<port>\d+)?(?<path>[\/\w\-\.\%\,]+)?(?<query>\?[^\#]*)?(?<fragment>\#.*)?$", url)
+
+    scheme::String = !isnothing(parts["scheme"]) ? parts["scheme"] : ""
+    username::String = !isnothing(parts["username"]) ? parts["username"] : ""
+    password::String = !isnothing(parts["password"]) ? parts["password"] : ""
+    host::String = !isnothing(parts["host"]) ? parts["host"] : ""
     subdomain::String, domain::String, tld::String = extract(host)
-    port::String = parts[5]
-    path::String = parts[6]
+    port::String = !isnothing(parts["port"]) ? parts["port"] : ""
+    path::String = !isnothing(parts["path"]) ? parts["path"] : ""
     directory::String = dirname(path)
     file::String = basename(path)
-    query::String = parts[7]
-    fragment::String = parts[8]
+    query::String = !isnothing(parts["query"]) ? parts["query"] : ""
+    fragment::String = !isnothing(parts["fragment"]) ? parts["fragment"] : ""
     parameters::Vector{String} = _parameters(query)
     parameters_count::Int32 = length(parameters)
     parameters_value::Vector{String} = _parameters_value(query)
@@ -114,12 +112,12 @@ function URL(url::AbstractString)
 
     _scheme::String = match(r"^\w+:\/\/", url).match
     _username::String = match(r"^(\w+):\/\/(([\w\-]+)\:?)", url).match
-    _password::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?", url).match
-    _host::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+)", url).match
-    _port::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+):?(\d+)?", url).match
-    _path::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?", url).match
-    _query::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?(\?[^\#]*)?", url).match
-    _fragment::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.+)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?(\?[^\#]*)?(\#.*)?", url).match
+    _password::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?", url).match
+    _host::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?([\w\-\.]+)", url).match
+    _port::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?([\w\-\.]+):?(\d+)?", url).match
+    _path::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?", url).match
+    _query::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?(\?[^\#]*)?", url).match
+    _fragment::String = match(r"^(\w+):\/\/(([\w\-]+)\:?(.*)\@)?([\w\-\.]+):?(\d+)?([\/\w\-\.\%\,]+)?(\?[^\#]*)?(\#.*)?", url).match
 
     return URL(scheme, username, password, host, subdomain, domain, tld, port, path, directory, file, query, fragment, parameters, parameters_count, parameters_value, parameters_value_count, all, _scheme, _username, _password, _host, _port, _path, _query, _fragment)
 end
