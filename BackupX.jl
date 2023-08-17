@@ -6,10 +6,24 @@ using Printf
 function generate(; urls, patterns, words, nums, years, months, days, exts, output)
     res = String[]
 
-    for url in urls
-        u = URL(url)
-        global scheme, username, password, host, subdomain, domain, tld, port, path, directory, file, query, fragment = map(x -> [x], u.all)
-        subdomain = _subs(subdomain...)
+    for u in urls
+        url = URL(u)
+        global scheme = String[url.scheme]
+        global username = String[url.username]
+        global password = String[url.password]
+        global host = String[url.host]
+        global subdomain = String[url.subdomain]
+        global domain = String[url.domain]
+        global tld = String[url.tld]
+        global port = String[url.port]
+        global path = String[url.path]
+        global directory = String[url.directory]
+        global file = String[url.file]
+        global fileN = String[url.file_name]
+        global fileE = String[url.file_extension]
+        global query = String[url.query]
+        global fragment = String[url.fragment]
+        subdomain = _subs(url)
         global word = words
         global num = nums
         global y = years
@@ -43,7 +57,7 @@ end
 
 function main()
     arguments = ARGUMENTS()
-    
+
     patterns = open(arguments["pattern"], "r") do f
         try
             D = read(f, String) |> JSON.parse
@@ -53,7 +67,7 @@ function main()
             end
             A
         catch e
-            @warn sprint(showerror, e) file=arguments["pattern"]
+            @warn sprint(showerror, e) file = arguments["pattern"]
             exit(0)
         end
     end

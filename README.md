@@ -16,7 +16,7 @@
 # install julia: https://julialang.org/downloads/    or    snap install julia --classic
 # then run this commands in terminal:
 
-* 1. julia -e 'using Pkg; Pkg.add("JSON"); Pkg.add("ArgParse")'
+* 1. julia -e 'using Pkg; Pkg.add("JSON"); Pkg.add("ArgParse"); Pkg.add("OrderedCollections")'
 * 2. git clone https://github.com/mrmeeseeks01/BackupX.git
 * 3. cd BackupX/
 * 4. julia BackupX.jl -h
@@ -79,8 +79,10 @@
 * path:      /dir1/dir2/myfile.php
 * directory: /dir1/dir2
 * file:      myfile.php
-* query:     ?id=5678&user=nobody
-* fragment:  #nothing
+* fileN:     myfile
+* fileE:     php
+* query:     id=5678&user=nobody
+* fragment:  nothing
 
 * word:      your custom words
 * ext:       your custom extensions
