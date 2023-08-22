@@ -1,5 +1,6 @@
 using JSON
 using OrderedCollections
+using LibCURL
 
 struct URL
     url::String
@@ -34,65 +35,21 @@ struct URL
 end
 
 function Decode(st::AbstractString)
+    curl = curl_easy_init()
+    output_ptr = C_NULL
+    output_len = Ref{Cint}()
+    output_ptr = curl_easy_unescape(curl, st, 0, output_len)
+    output = unsafe_string(output_ptr)
+    curl_free(output_ptr)
+    curl_easy_cleanup(curl)
     decode = Dict{Regex,String}(
-        r"%20"i => " ",
-        r"%21"i => "!",
-        r"%22"i => "\"",
-        r"%23"i => "#",
-        r"%24"i => "\$",
-        r"%25"i => "%",
-        r"%26"i => "&",
-        r"%27"i => "'",
-        r"%28"i => "(",
-        r"%29"i => ")",
-        r"%2a"i => "*",
-        r"%2b"i => "+",
-        r"%2c"i => ",",
-        r"%2d"i => "-",
-        r"%2e"i => ".",
-        r"%2f"i => "/",
-        r"%30"i => "0",
-        r"%31"i => "1",
-        r"%32"i => "2",
-        r"%33"i => "3",
-        r"%34"i => "4",
-        r"%35"i => "5",
-        r"%36"i => "6",
-        r"%37"i => "7",
-        r"%38"i => "8",
-        r"%39"i => "9",
-        r"%40"i => "@",
-        r"%60"i => "`",
-        r"%2a"i => "*",
-        r"%2b"i => "+",
-        r"%2c"i => ",",
-        r"%2d"i => "-",
-        r"%2e"i => ".",
-        r"%2f"i => "/",
-        r"%3a"i => ":",
-        r"%3b"i => ";",
-        r"%3c"i => "<",
-        r"%3d"i => "=",
-        r"%3e"i => ">",
-        r"%3f"i => "?",
-        r"%5b"i => "[",
-        r"%5c"i => "\\",
-        r"%5d"i => "]",
-        r"%5e"i => "^",
-        r"%5f"i => "_",
-        r"%7b"i => "{",
-        r"%7c"i => "|",
-        r"%7d"i => "}",
-        r"%7e"i => "~",
-        r"%7f"i => "",
-        r"%0c"i => "",
         r"&quot;" => "\"",
         r"amp;" => "",
         r"&lt;" => "<",
         r"&gt;" => ">",
         r"&#39;" => "'"
     )
-    return replace(replace(st, decode...), "&&" => "&")
+    return replace(replace(output, decode...), "&&" => "&")
 end
 
 function check_str(input::Union{AbstractString,Nothing})
