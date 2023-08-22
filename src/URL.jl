@@ -35,13 +35,16 @@ struct URL
 end
 
 function Decode(st::AbstractString)
-    curl = curl_easy_init()
-    output_ptr = C_NULL
-    output_len = Ref{Cint}()
-    output_ptr = curl_easy_unescape(curl, st, 0, output_len)
-    output = unsafe_string(output_ptr)
-    curl_free(output_ptr)
-    curl_easy_cleanup(curl)
+    while occursin(r"(\%[0-9a-fA-F]{2})", st)
+        curl = curl_easy_init()
+        output_ptr = C_NULL
+        output_len = Ref{Cint}()
+        output_ptr = curl_easy_unescape(curl, st, 0, output_len)
+        st = unsafe_string(output_ptr)
+        curl_free(output_ptr)
+        curl_easy_cleanup(curl)
+    end
+
     decode = Dict{Regex,String}(
         r"&quot;" => "\"",
         r"amp;" => "",
@@ -49,7 +52,7 @@ function Decode(st::AbstractString)
         r"&gt;" => ">",
         r"&#39;" => "'"
     )
-    return replace(replace(output, decode...), "&&" => "&")
+    return replace(replace(st, decode...), "&&" => "&")
 end
 
 function check_str(input::Union{AbstractString,Nothing})
