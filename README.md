@@ -11,7 +11,7 @@
 
 # Install
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                            *** julia ***
+                                       *** julia ***
 
 # install julia: https://julialang.org/downloads/    or    snap install julia --classic
 # then run this commands in terminal:
@@ -27,9 +27,7 @@
 * 1. git clone https://github.com/mrmeeseeks01/BackupX.git
 * 2. cd BackupX/
 * 3. docker build -t backupx .
-* 4. docker run -it backupx
-* 5. press ; to enabled shell mode
-* 6. julia BackupX.jl -h
+* 4. docker run backupx
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Switches
