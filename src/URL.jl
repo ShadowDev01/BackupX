@@ -45,14 +45,17 @@ function Decode(st::AbstractString)
         curl_easy_cleanup(curl)
     end
 
-    decode = Dict{Regex,String}(
-        r"&quot;" => "\"",
-        r"amp;" => "",
-        r"&lt;" => "<",
-        r"&gt;" => ">",
-        r"&#39;" => "'"
-    )
-    return replace(replace(st, decode...), "&&" => "&")
+    for escape in eachmatch(r"&#(?<number>[a-zA-Z0-9]+);", st)
+        n = escape["number"]
+        num = parse(Int, startswith(n, "x") ? "0$n" : n)
+        st = replace(st, escape.match => Char(num))
+    end
+
+    while occursin(r"&(gt|lt|quot|apos|amp);"i, st)
+        st = replace(st, r"&gt;"i => ">", r"&lt;"i => "<", r"&quot;"i => "\"", r"&apos;"i => "'", r"&amp;"i => "&")
+    end
+    
+    return st
 end
 
 function check_str(input::Union{AbstractString,Nothing})
