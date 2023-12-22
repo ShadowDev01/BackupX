@@ -47,9 +47,11 @@ function ARGUMENTS()
     @add_arg_table settings begin
         "-u", "--url"
         help = "single url"
+        arg_type = String
 
         "-U", "--urls"
         help = "multiple targets urls in file to crawl"
+        arg_type = String
 
         "-s", "--stdin"
         help = "read from stdin"
@@ -58,6 +60,7 @@ function ARGUMENTS()
         "-p", "--pattern"
         help = "pattern files"
         required = true
+        arg_type = String
 
         "-w", "--wordlist"
         help = "words"

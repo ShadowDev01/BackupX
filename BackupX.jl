@@ -1,11 +1,13 @@
 include("src/args.jl")
 include("src/URL.jl")
+
 using JSON
 using Printf
+using OrderedCollections
 
-function generate(; urls, patterns, words, nums, years, months, days, exts, output)
-    res = String[]
+RESULT = OrderedSet{String}()
 
+function GenerateBackupNames(; urls, patterns, words, nums, years, months, days, exts, output)
     for u in urls
         url = URL(u)
         global scheme = String[url.scheme]
@@ -23,7 +25,7 @@ function generate(; urls, patterns, words, nums, years, months, days, exts, outp
         global fileE = String[url.file_extension]
         global query = String[url.query]
         global fragment = String[url.fragment]
-        subdomain = _subs(url)
+        subdomain = SubCombination(url)
         global word = words
         global num = nums
         global y = years
@@ -36,57 +38,99 @@ function generate(; urls, patterns, words, nums, years, months, days, exts, outp
             edit = split(pattern, !isletter, keepempty=false)
             mix = map(eval ∘ Meta.parse, edit)
             for items in Iterators.product(mix...)
-                push!(res, Printf.format(printf, items...))
+                push!(RESULT, Printf.format(printf, items...))
             end
         end
-    end
 
-    if !isnothing(output)
-        open(output, "w+") do f
-            write(f, join(unique(res), "\n"))
-        end
-    else
-        print(join(unique(res), "\n"))
     end
 end
 
-function numbers(s::String, p::Int=1)
-    x = map(n -> parse(Int64, strip(n)), split(s, "-"))
-    map(i -> string(i, pad=p), collect(x[1]:x[2]))
-end
-
-function main()
-    arguments = ARGUMENTS()
-
-    patterns = open(arguments["pattern"], "r") do f
-        try
-            D = read(f, String) |> JSON.parse
-            A = String[]
-            for key in keys(D)
-                append!(A, D[key])
-            end
-            A
-        catch e
-            @warn sprint(showerror, e) file = arguments["pattern"]
+function NumberSequence(range::String, padding::Int=1)
+    try
+        numbers = map(number -> parse(Int64, strip(number)), split(range, "-"))
+        if numbers[1] > numbers[2]
+            @error "Incorrect Range: $range\nCorrect: $(numbers[2])-$(numbers[1])"
+            exit(0)
+        end
+        sequence = map(number -> string(number, pad=padding), collect(numbers[1]:numbers[2]))
+    catch e
+        if isa(e, ArgumentError)
+            @error "Range Should be Numbers: $range"
             exit(0)
         end
     end
+end
 
-    words = !isnothing(arguments["wordlist"]) ? readlines(arguments["wordlist"]) : [""]
-    ext = !isnothing(arguments["extension"]) ? readlines(arguments["extension"]) : [""]
-    number = !isnothing(arguments["number"]) ? numbers(arguments["number"]) : [""]
-    years = !isnothing(arguments["year"]) ? numbers(arguments["year"]) : [""]
-    months = !isnothing(arguments["month"]) ? numbers(arguments["month"], 2) : [""]
-    days = !isnothing(arguments["day"]) ? numbers(arguments["day"], 2) : [""]
+function OpenPatterns(FilePath::String)
+    if !isfile(FilePath)
+        @error "No Such File or Directory: $FilePath"
+        exit(0)
+    end
+
+    File = try
+        pattern = read(FilePath, String) |> JSON.parse
+        KEYS = String[]
+        for key in keys(pattern)
+            append!(KEYS, pattern[key])
+        end
+        KEYS
+    catch e
+        @warn sprint(showerror, e) file = FilePath
+        exit(0)
+    end
+end
+
+function ReadNonEmptyLines(FilePath::String)
+    if isfile(FilePath)
+        filter(!isempty, readlines(FilePath))
+    else
+        @error "Not Such File or Directory: $FilePath"
+        exit(0)
+    end
+end
+
+function main()
+    # Get User Passed CLI Argument
+    arguments = ARGUMENTS()
+
+    # Extract Arguments
+    # Input URLS
+    URLS = String[]
+    Url = arguments["url"]
+    Urls = arguments["urls"]
+    stdin = arguments["stdin"]
+
+    # Reading Files
+    patterns = arguments["pattern"] |> OpenPatterns
+    words = !isnothing(arguments["wordlist"]) ? ReadNonEmptyLines(arguments["wordlist"]) : [""]
+    ext = !isnothing(arguments["extension"]) ? ReadNonEmptyLines(arguments["extension"]) : [""]
+
+    # Number Ranges
+    number = !isnothing(arguments["number"]) ? NumberSequence(arguments["number"]) : [""]
+    years = !isnothing(arguments["year"]) ? NumberSequence(arguments["year"]) : [""]
+    months = !isnothing(arguments["month"]) ? NumberSequence(arguments["month"], 2) : [""]
+    days = !isnothing(arguments["day"]) ? NumberSequence(arguments["day"], 2) : [""]
+
     output = arguments["output"]
 
-    if arguments["stdin"]
-        generate(urls=readlines(stdin), patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
-    elseif !isnothing(arguments["url"])
-        generate(urls=[arguments["url"]], patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
-    elseif !isnothing(arguments["urls"])
-        generate(urls=readlines(arguments["urls"]), patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+    if stdin
+        URLS = readlines(stdin)
+    elseif !isempty(Url)
+        URLS = [Url]
+    elseif !isempty(Urls)
+        URLS = ReadNonEmptyLines(Urls)
     end
+
+    GenerateBackupNames(urls=URLS, patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+
+    if !isnothing(output)
+        open(output, "w+") do file
+            write(file, join(RESULT, "\n"))
+        end
+    else
+        print(join(RESULT, "\n"))
+    end
+
 end
 
 main()
