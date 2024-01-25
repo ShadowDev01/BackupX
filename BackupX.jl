@@ -1,3 +1,4 @@
+include("src/banner.jl")
 include("src/args.jl")
 include("src/URL.jl")
 
