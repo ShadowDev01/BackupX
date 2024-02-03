@@ -131,9 +131,9 @@ function main()
         URLS = ReadNonEmptyLines(args["U"])
     end
 
-    @info "Generating 🛠️"
+    @info "Generating... 🛠️"
     GenerateBackupNames(urls=URLS, patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext)
-    @info "$colorYellow$(length(RESULT))$colorReset Item Generated ✅"
+    @info "$colorYellow$(length(RESULT))$colorReset Items Generated ✅"
 
     if !isempty(args["output"])
         open(args["output"], "w+") do file
