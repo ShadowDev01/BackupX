@@ -35,13 +35,13 @@
 # optional arguments:
 
 *  -h, --help            show this help message and exit
-*  -u, --url             single url
-*  -U, --urls            multiple urls in file
-*  -s, --stdin           read url(s) from stdin
-*  -p, --pattern         pattern file
-*  -w, --wordlist        wordlist file
-*  -e, --extension       extensions file
-*  -n, --number          number range (i.e. 1-100)
+*  -u                    single url
+*  -U                    multiple urls in file
+*  -s                    read url(s) from stdin
+*  -p                    pattern file
+*  -w                    wordlist file
+*  -e                    extensions file
+*  -n                    number range (i.e. 1-100)
 *  -y, --year            year range (i.e. 2022-2023)
 *  -m, --month           month range (i.e. 1-12)
 *  -d, --day             day range (i.e. 1-30)

@@ -6,10 +6,29 @@ using JSON
 using Printf
 using OrderedCollections
 
+const args = ARGUMENTS()
 RESULT = OrderedSet{String}()
 
-function GenerateBackupNames(; urls, patterns, words, nums, years, months, days, exts, output)
-    for u in urls
+const colorReset = "\033[0m"
+const colorRed = "\033[31m"
+const colorLightRed = "\033[91m"
+const colorGreen = "\033[32m"
+const colorYellow = "\033[33m"
+const colorLightYellow = "\033[93m"
+const colorBlue = "\033[34m"
+const colorLightBlue = "\033[94m"
+const colorCyan = "\033[96m"
+const colorMagenta = "\033[35m"
+const colorLightMagenta = "\033[95m"
+const colorWhite = "\033[97m"
+const colorBlack = "\033[30m"
+const textItalic = "\033[3m"
+const textBold = "\033[1m"
+const textBox = "\033[7m"
+const textBlink = "\033[5m"
+
+function GenerateBackupNames(; urls, patterns, words, nums, years, months, days, exts)
+    Threads.@threads for u in urls
         url = URL(u)
         global scheme = String[url.scheme]
         global username = String[url.username]
@@ -91,42 +110,35 @@ function ReadNonEmptyLines(FilePath::String)
 end
 
 function main()
-    # Get User Passed CLI Argument
-    arguments = ARGUMENTS()
-
-    # Extract Arguments
-    # Input URLS
     URLS = String[]
-    Url = arguments["url"]
-    Urls = arguments["urls"]
-    stdin = arguments["stdin"]
-
-    # Reading Files
-    patterns = arguments["pattern"] |> OpenPatterns
-    words = !isnothing(arguments["wordlist"]) ? ReadNonEmptyLines(arguments["wordlist"]) : [""]
-    ext = !isnothing(arguments["extension"]) ? ReadNonEmptyLines(arguments["extension"]) : [""]
+    @info "Checking Patterns 🔍"
+    patterns = args["p"] |> OpenPatterns
+    @info "$colorYellow$(length(patterns))$colorReset Patterns Parsed ✅"
+    words = !isempty(args["w"]) ? ReadNonEmptyLines(args["w"]) : [""]
+    ext = !isempty(args["e"]) ? ReadNonEmptyLines(args["e"]) : [""]
 
     # Number Ranges
-    number = !isnothing(arguments["number"]) ? NumberSequence(arguments["number"]) : [""]
-    years = !isnothing(arguments["year"]) ? NumberSequence(arguments["year"]) : [""]
-    months = !isnothing(arguments["month"]) ? NumberSequence(arguments["month"], 2) : [""]
-    days = !isnothing(arguments["day"]) ? NumberSequence(arguments["day"], 2) : [""]
+    number = !isempty(args["n"]) ? NumberSequence(args["n"]) : [""]
+    years = !isempty(args["year"]) ? NumberSequence(args["year"]) : [""]
+    months = !isempty(args["month"]) ? NumberSequence(args["month"], 2) : [""]
+    days = !isempty(args["day"]) ? NumberSequence(args["day"], 2) : [""]
 
-    output = arguments["output"]
-
-    if stdin
-        URLS = readlines(stdin)
-    elseif !isempty(Url)
-        URLS = [Url]
-    elseif !isempty(Urls)
-        URLS = ReadNonEmptyLines(Urls)
+    if args["s"]
+        URLS = filter(!isempty, readlines(stdin))
+    elseif !isempty(args["u"])
+        URLS = [args["u"]]
+    elseif !isempty(args["U"])
+        URLS = ReadNonEmptyLines(args["U"])
     end
 
-    GenerateBackupNames(urls=URLS, patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext, output=output)
+    @info "Generating 🛠️"
+    GenerateBackupNames(urls=URLS, patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext)
+    @info "$colorYellow$(length(RESULT))$colorReset Item Generated ✅"
 
-    if !isnothing(output)
-        open(output, "w+") do file
+    if !isempty(args["output"])
+        open(args["output"], "w+") do file
             write(file, join(RESULT, "\n"))
+            @info "OUTPUT Saved in $colorGreen$textBold$(args["output"])$colorReset 📄"
         end
     else
         print(join(RESULT, "\n"))

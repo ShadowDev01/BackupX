@@ -45,44 +45,60 @@ function ARGUMENTS()
       """
     )
     @add_arg_table settings begin
-        "-u", "--url"
+        "-u"
         help = "single url"
         arg_type = String
+        default = ""
 
-        "-U", "--urls"
+        "-U"
         help = "multiple targets urls in file to crawl"
         arg_type = String
+        default = ""
 
-        "-s", "--stdin"
+        "-s"
         help = "read from stdin"
         action = :store_true
+        default = false
 
-        "-p", "--pattern"
+        "-p"
         help = "pattern files"
         required = true
         arg_type = String
 
-        "-w", "--wordlist"
-        help = "words"
+        "-w"
+        help = "wordlist"
+        arg_type = String
+        default = ""
 
-        "-e", "--extension"
+        "-e"
         help = "extensions"
+        arg_type = String
+        default = ""
 
         "-y", "--year"
         help = "years"
+        arg_type = String
+        default = ""
 
         "-m", "--month"
         help = "month"
+        arg_type = String
+        default = ""
 
         "-d", "--day"
         help = "day"
+        arg_type = String
+        default = ""
 
-        "-n", "--number"
+        "-n"
         help = "numbers"
         arg_type = String
+        default = ""
 
         "-o", "--output"
         help = "save output in file"
+        arg_type = String
+        default = ""
     end
     parsed_args = parse_args(ARGS, settings)
     return parsed_args

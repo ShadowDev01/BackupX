@@ -1,4 +1,4 @@
-FROM julia:1.9.3
+FROM julia:1.10.0
 RUN julia -e 'using Pkg; Pkg.add("JSON"); Pkg.add("ArgParse"); Pkg.add("OrderedCollections")'
 RUN mkdir /BackupX
 WORKDIR /BackupX/
