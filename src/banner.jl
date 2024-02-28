@@ -7,6 +7,7 @@ function banner()
     |____/ \\__,_|\\___|_|\\_\\__,_|  .__/_/\\_\\
                                 |_|        
                               by mrmeeseeks
+                              v1.0.2
 
 """, color=:red, blink=true, bold=true)
 end

@@ -11,6 +11,8 @@ function ARGUMENTS()
         **** generate wordlist by given pattern to find backup files ***
         \n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         """,
+        version="v1.0.2",
+        add_version=true,
         epilog="""
         \n\n$(yellow)## Variables:$(nc)\n\n
 

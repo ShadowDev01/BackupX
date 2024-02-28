@@ -54,14 +54,18 @@ function GenerateBackupNames(; urls, patterns, words, nums, years, months, days,
         global ext = exts
 
         Threads.@threads for pattern in patterns
-            printf = replace(pattern, "\$" => "%s", "%" => "%s", isletter => "") |> Printf.Format
-            edit = split(pattern, !isletter, keepempty=false)
-            mix = map(eval ∘ Meta.parse, edit)
-            for items in Iterators.product(mix...)
-                push!(RESULT, Printf.format(printf, items...))
+            try
+                printf = replace(pattern, "\$" => "%s", "%" => "%s", isletter => "") |> Printf.Format
+                edit = split(pattern, !isletter, keepempty=false)
+                mix = map(eval ∘ Meta.parse, edit)
+                for items in Iterators.product(mix...)
+                    push!(RESULT, Printf.format(printf, items...))
+                end
+            catch err
+                @error sprint(showerror, err)
+                exit(0)
             end
         end
-
     end
 end
 
@@ -81,6 +85,20 @@ function NumberSequence(range::String, padding::Int=1)
     end
 end
 
+function check_pattern_var(patterns::Vector{String})
+    pat_vars = ("scheme", "username", "password", "host", "subdomain", "domain", "tld", "port", "path", "directory", "file", "fileN", "fileE", "query", "fragment", "word", "ext", "num", "y", "m", "d")
+    found_vars = Set{String}()
+
+    for pat in patterns
+        push!(found_vars, split(pat, !isletter, keepempty=false)...)
+    end
+
+    if !issubset(found_vars, pat_vars)
+        @error "$(setdiff(found_vars, pat_vars) |> collect) variables not supported -> $(args["p"]) ❎"
+        exit(0)
+    end
+end
+
 function OpenPatterns(FilePath::String)
     if !isfile(FilePath)
         @error "No Such File or Directory: $FilePath"
@@ -88,12 +106,16 @@ function OpenPatterns(FilePath::String)
     end
 
     File = try
-        pattern = read(FilePath, String) |> JSON.parse
-        KEYS = String[]
-        for key in keys(pattern)
-            append!(KEYS, pattern[key])
+        patterns = read(FilePath, String) |> JSON.parse
+        sub_patterns = String[]
+
+        for key in keys(patterns)
+            append!(sub_patterns, patterns[key])
         end
-        KEYS
+
+        check_pattern_var(sub_patterns)
+
+        sub_patterns
     catch e
         @warn sprint(showerror, e) file = FilePath
         exit(0)
@@ -111,9 +133,11 @@ end
 
 function main()
     URLS = String[]
+
     @info "Checking Patterns 🔍"
     patterns = args["p"] |> OpenPatterns
     @info "$colorYellow$(length(patterns))$colorReset Patterns Parsed ✅"
+
     words = !isempty(args["w"]) ? ReadNonEmptyLines(args["w"]) : [""]
     ext = !isempty(args["e"]) ? ReadNonEmptyLines(args["e"]) : [""]
 
