@@ -105,6 +105,8 @@ function OpenPatterns(FilePath::String)
         exit(0)
     end
 
+    @info "Checking Patterns 🔍"
+
     File = try
         patterns = read(FilePath, String) |> JSON.parse
         sub_patterns = String[]
@@ -134,7 +136,6 @@ end
 function main()
     URLS = String[]
 
-    @info "Checking Patterns 🔍"
     patterns = args["p"] |> OpenPatterns
     @info "$colorYellow$(length(patterns))$colorReset Patterns Parsed ✅"
 

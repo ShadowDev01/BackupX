@@ -60,7 +60,6 @@ function ARGUMENTS()
         "-s"
         help = "read from stdin"
         action = :store_true
-        default = false
 
         "-p"
         help = "pattern files"
