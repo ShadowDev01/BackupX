@@ -11,7 +11,7 @@ function ARGUMENTS()
         **** generate wordlist by given pattern to find backup files ***
         \n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         """,
-        version="v1.0.2",
+        version="v1.0.3",
         add_version=true,
         epilog="""
         \n\n$(yellow)## Variables:$(nc)\n\n
@@ -95,6 +95,10 @@ function ARGUMENTS()
         help = "numbers"
         arg_type = String
         default = ""
+
+        "--silent"
+        help = "Do not print additional information (default: false)"
+        action = :store_true
 
         "-o", "--output"
         help = "save output in file"

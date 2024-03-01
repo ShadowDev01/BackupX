@@ -35,6 +35,7 @@
 # optional arguments:
 
 *  -h, --help            show this help message and exit
+*  --version             show version information and exit
 *  -u                    single url
 *  -U                    multiple urls in file
 *  -s                    read url(s) from stdin
@@ -45,6 +46,8 @@
 *  -y, --year            year range (i.e. 2022-2023)
 *  -m, --month           month range (i.e. 1-12)
 *  -d, --day             day range (i.e. 1-30)
+*  --silent              do not print additional information (default: false)
+*  -o, --output          save output in file (default: "")
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Examples

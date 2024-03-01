@@ -94,7 +94,8 @@ function check_pattern_var(patterns::Vector{String})
     end
 
     if !issubset(found_vars, pat_vars)
-        @error "$(setdiff(found_vars, pat_vars) |> collect) variables not supported -> $(args["p"]) ❎"
+        bad_vars = setdiff(found_vars, pat_vars) |> collect
+        @error "$bad_vars variables not supported -> $(args["p"]) ❎"
         exit(0)
     end
 end
@@ -105,7 +106,7 @@ function OpenPatterns(FilePath::String)
         exit(0)
     end
 
-    @info "Checking Patterns 🔍"
+    args["silent"] || @info "Checking Patterns 🔍"
 
     File = try
         patterns = read(FilePath, String) |> JSON.parse
@@ -134,10 +135,11 @@ function ReadNonEmptyLines(FilePath::String)
 end
 
 function main()
+    args["silent"] || banner()
     URLS = String[]
 
     patterns = args["p"] |> OpenPatterns
-    @info "$colorYellow$(length(patterns))$colorReset Patterns Parsed ✅"
+    args["silent"] || @info "$colorYellow$(length(patterns))$colorReset Patterns Parsed ✅"
 
     words = !isempty(args["w"]) ? ReadNonEmptyLines(args["w"]) : [""]
     ext = !isempty(args["e"]) ? ReadNonEmptyLines(args["e"]) : [""]
@@ -156,14 +158,14 @@ function main()
         URLS = ReadNonEmptyLines(args["U"])
     end
 
-    @info "Generating... 🛠️"
+    args["silent"] || @info "Generating... 🛠️"
     GenerateBackupNames(urls=URLS, patterns=patterns, words=words, nums=number, years=years, months=months, days=days, exts=ext)
-    @info "$colorYellow$(length(RESULT))$colorReset Items Generated ✅"
+    args["silent"] || @info "$colorYellow$(length(RESULT))$colorReset Items Generated ✅"
 
     if !isempty(args["output"])
         open(args["output"], "w+") do file
             write(file, join(RESULT, "\n"))
-            @info "OUTPUT Saved in $colorGreen$textBold$(args["output"])$colorReset 📄"
+            args["silent"] || @info "OUTPUT Saved in $colorGreen$textBold$(args["output"])$colorReset 📄"
         end
     else
         print(join(RESULT, "\n"))
