@@ -32,22 +32,20 @@
 
 # Switches
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# optional arguments:
+# optional switches:
 
-*  -h, --help            show this help message and exit
-*  --version             show version information and exit
-*  -u                    single url
-*  -U                    multiple urls in file
-*  -s                    read url(s) from stdin
-*  -p                    pattern file
-*  -w                    wordlist file
-*  -e                    extensions file
-*  -n                    number range (i.e. 1-100)
-*  -y, --year            year range (i.e. 2022-2023)
-*  -m, --month           month range (i.e. 1-12)
-*  -d, --day             day range (i.e. 1-30)
-*  --silent              do not print additional information (default: false)
-*  -o, --output          save output in file (default: "")
+* -h            Show help message and exit
+* -u            Specify a single URL to process.
+* -ul           Provide a file containing multiple URLs to process
+* -s            Read URL(s) from standard input (stdin)
+* -p            Specify a file containing patterns to use in JSON format
+* -w            Provide a wordlist file for processing
+* -e            Specify a file containing extensions to use
+* -n            Define a number range (e.g., 1-100)
+* -y            Define a year range (e.g., 2022-2023)
+* -m            Define a month range (e.g., 1-12)
+* -d            Define a day range (e.g., 1-30)
+* -o            Save the output to a file (default: empty)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Examples
@@ -57,7 +55,7 @@
 ~~~
 * generate wordlist by your custom input
 ~~~
-> julia BackupX.jl -U [file] -p [file] -w [file] -e [file] -n [min-max] -y [min-max] -m [min-max] -d [min-max]
+> julia BackupX.jl -ul [file] -p [file] -w [file] -e [file] -n [min-max] -y [min-max] -m [min-max] -d [min-max]
 ~~~
 * for example generate wordlist by single url with this pattern: $subdomain.$domain.$ext$num.$y-$m-$d
 ~~~
@@ -66,31 +64,30 @@
 
 # Variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# for example consider this url: https://root:1234@api-v1.admin.mysite.co.uk:443/dir1/dir2/myfile.php?id=5678&user=nobody#nothing
-# you can use below variables in your custom patterns:
 
-* scheme:    https
-* username:  root
-* password:  1234
-* host:      api-v1.admin.mysite.co.uk
-* subdomain: api-v1.admin                    ->   "ap1-v1.admin", "ap1", "v1", "admin", "ap1-v1"
-* domain:    mysite
-* tld:       co.uk
-* port:      443
-* path:      /dir1/dir2/myfile.php
-* directory: /dir1/dir2
-* file:      myfile.php
-* fileN:     myfile
-* fileE:     php
-* query:     id=5678&user=nobody
-* fragment:  nothing
+# optional variables:
 
-* word:      your custom words
-* ext:       your custom extensions
-* num:       numbers (i.e. 1-100)
-* y:         years (i.e. 2022-2023)
-* m:         months (i.e. 1-12)
-* d:         days (i.e. 1-30)
+* scheme
+* username
+* password
+* host
+* subdomain
+* domain
+* tld
+* port
+* path
+* directory
+* file
+* fileN          file name
+* fileE          file extension
+* query
+* fragment
+* word           wordlist
+* ext            extensions
+* num            number range
+* y              year range
+* m              month range
+* d              day range
 
 
 # you can use $ or % to define your variables in pattern: $num or %num     $ext or %ext

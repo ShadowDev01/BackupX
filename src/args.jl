@@ -1,110 +1,142 @@
-using ArgParse
+using StyledStrings
+
+const help = styled"""
+{bold,success,region:# optional switches:}
+
+{tip:* -h}            Show help message and exit
+{tip:* -u}            Specify a single URL to process.
+{tip:* -ul}           Provide a file containing multiple URLs to process
+{tip:* -s}            Read URL(s) from standard input (stdin)
+{tip:* -p}            Specify a file containing patterns to use in JSON format
+{tip:* -w}            Provide a wordlist file for processing
+{tip:* -e}            Specify a file containing extensions to use
+{tip:* -n}            Define a number range (e.g., 1-100)
+{tip:* -y}            Define a year range (e.g., 2022-2023)
+{tip:* -m}            Define a month range (e.g., 1-12)
+{tip:* -d}            Define a day range (e.g., 1-30)
+{tip:* -o}            Save the output to a file (default: empty)
+
+
+{bold,info,region:# optional variables:}
+
+{info:* scheme}       
+{info:* username}
+{info:* password}
+{info:* host}
+{info:* subdomain}
+{info:* domain}
+{info:* tld}
+{info:* port}
+{info:* path}
+{info:* directory}
+{info:* file}
+{info:* fileN}          file name
+{info:* fileE}          file extension
+{info:* query}
+{info:* fragment}
+{info:* word}           wordlist
+{info:* ext}            extensions
+{info:* num}            number range
+{info:* y}              year range
+{info:* m}              month range
+{info:* d}              day range
+"""
+
+
+function single_pass(param::String)
+	idx = findfirst(==(param), ARGS) + 1
+	if isassigned(ARGS, idx) && !startswith(ARGS[idx], "-")
+		return ARGS[idx]
+	else
+		return ""
+	end
+end
+
+function multi_pass(param::String)
+	res = String[]
+	idx1 = findfirst(==(param), ARGS)
+	for i in ARGS[idx1+1:end]
+		startswith(i, "-") && break
+		push!(res, i)
+	end
+	return res
+end
+
+function number_sequence(range::String, padding::Int = 2)
+	try
+		range = replace(range, "-" => ":")
+		seq = eval(Meta.parse(range))
+		string.(seq, pad = padding)
+	catch e
+		if isa(e, ArgumentError)
+			@error "Range Should be Numbers: $range"
+			exit(0)
+		end
+	end
+end
 
 function ARGUMENTS()
-    cyan::String = "\u001b[36m"
-    yellow::String = "\u001b[33m"
-    nc::String = "\033[0m"
-    settings = ArgParseSettings(
-        prog="BackupX",
-        description="""
-        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n
-        **** generate wordlist by given pattern to find backup files ***
-        \n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        """,
-        version="v1.0.3",
-        add_version=true,
-        epilog="""
-        \n\n$(yellow)## Variables:$(nc)\n\n
+	args = Dict{String, Any}(
+		"source" => String[],
+		"u" => "",
+		"ul" => "",
+		"p" => "",
+		"w" => "",
+		"e" => "",
+		"n" => "",
+		"y" => "",
+		"m" => "",
+		"d" => "",
+		"o" => "",
+		"s" => false,
+	)
 
-        $(yellow)for example consider this url:$(nc) $(cyan)https://root:1234@api-v1.admin.mysite.co.uk:443/dir1/dir2/myfile.php?id=5678&user=nobody#nothing$(nc)\n\n
+	("-h" ∈ ARGS) && (print(help), exit(0))
+	("-s" ∈ ARGS) && (args["s"] = true)
 
-        $(yellow)# you can use below variables in your custom patterns:$(nc)\n\n
+	for itm in ("-u", "-ul", "-p", "-w", "-e", "-n", "-y", "-m", "-d", "-o")
+		if itm ∈ ARGS
+			res = single_pass(itm)
+			!isempty(res) && (args[chopprefix(itm, "-")] = res)
+		end
+	end
 
-        * $(cyan)scheme:$(nc)    https\n
-        * $(cyan)username:$(nc)  root\n
-        * $(cyan)password:$(nc)  1234\n
-        * $(cyan)host:$(nc)      api-v1.admin.mysite.co.uk\n
-        * $(cyan)subdomain:$(nc) api-v1.admin -> "ap1-v1.admin", "ap1", "v1", "admin", "ap1-v1"\n
-        * $(cyan)domain:$(nc)    mysite\n
-        * $(cyan)tld:$(nc)       co.uk\n
-        * $(cyan)port:$(nc)      443\n
-        * $(cyan)path:$(nc)      /dir1/dir2/myfile.php\n
-        * $(cyan)directory:$(nc) /dir1/dir2\n
-        * $(cyan)file:$(nc)      myfile.php\n
-        * $(cyan)fileN:$(nc)     myfile\n
-        * $(cyan)fileE:$(nc)     php\n
-        * $(cyan)query:$(nc)     id=5678&user=nobody\n
-        * $(cyan)fragment:$(nc)  nothing\n
-        
-        * $(cyan)word:$(nc)      your custom words\n
-        * $(cyan)ext:$(nc)       your custom extensions\n
-        * $(cyan)num:$(nc)       numbers (i.e. 1-100)\n
-        * $(cyan)y:$(nc)         years (i.e. 2022-2023)\n
-        * $(cyan)m:$(nc)         months (i.e. 1-12)\n
-        * $(cyan)d:$(nc)         days (i.e. 1-30)\n\n
+	if args["s"]
+		lines = filter(!isempty, readlines(stdin))
+		append!(args["source"], lines)
+	end
 
-        $(yellow)you can use \$ or % to define your variables in pattern: \$num or %num     \$ext or %ext$(nc)
-      """
-    )
-    @add_arg_table settings begin
-        "-u"
-        help = "single url"
-        arg_type = String
-        default = ""
+	if !isempty(args["u"])
+		push!(args["source"], args["u"])
+	end
 
-        "-U"
-        help = "multiple targets urls in file to crawl"
-        arg_type = String
-        default = ""
+	if !isempty(args["ul"])
+		file = args["ul"]
+		if isfile(file)
+			lines = filter(!isempty, readlines(file))
+			append!(args["source"], lines)
+		end
+	end
 
-        "-s"
-        help = "read from stdin"
-        action = :store_true
+	if !isempty(args["w"])
+		file = args["w"]
+		if isfile(file)
+			args["w"] = filter(!isempty, readlines(file))
+		end
+	end
 
-        "-p"
-        help = "pattern files"
-        required = true
-        arg_type = String
+	if !isempty(args["e"])
+		file = args["e"]
+		if isfile(file)
+			args["e"] = filter(!isempty, readlines(file))
+		end
+	end
 
-        "-w"
-        help = "wordlist"
-        arg_type = String
-        default = ""
+	for item in ("n", "y", "m", "d")
+		if !isempty(args[item])
+			args[item] = number_sequence(args[item])
+		end
+	end
 
-        "-e"
-        help = "extensions"
-        arg_type = String
-        default = ""
-
-        "-y", "--year"
-        help = "years"
-        arg_type = String
-        default = ""
-
-        "-m", "--month"
-        help = "month"
-        arg_type = String
-        default = ""
-
-        "-d", "--day"
-        help = "day"
-        arg_type = String
-        default = ""
-
-        "-n"
-        help = "numbers"
-        arg_type = String
-        default = ""
-
-        "--silent"
-        help = "Do not print additional information (default: false)"
-        action = :store_true
-
-        "-o", "--output"
-        help = "save output in file"
-        arg_type = String
-        default = ""
-    end
-    parsed_args = parse_args(ARGS, settings)
-    return parsed_args
+	return args
 end
